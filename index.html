@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>서정빈의 취미 세계에 오신 것을 환영합니다</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Gowun Batang (부드러운 제목용) & Pretendard/Inter (본문용) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Gowun Batang"', 'serif'],
+                        sans: ['Inter', 'Pretendard', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 부드러운 폰트 렌더링 및 애니메이션 추가 */
+        body {
+            font-family: 'Inter', 'Pretendard', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            /* 커스텀 마우스 커서 적용을 위해 기본 커서 숨김 (데스크톱 전용) */
+            cursor: none;
+        }
+        
+        /* 링크, 버튼 등 포커스 가능한 요소의 호버 커서 세팅 */
+        a, button, [role="button"], input, select, textarea {
+            cursor: none;
+        }
+
+        .font-title {
+            font-family: 'Gowun Batang', serif;
+        }
+        /* 부드러운 호버 트랜지션 전역 적용 */
+        .smooth-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* 애니메이션 효과 */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* 타이핑 커서 깜빡임 애니메이션 */
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        .cursor-blink {
+            animation: blink 0.8s infinite;
+        }
+
+        /* 커스텀 마우스 커서 스타일 */
+        #custom-cursor {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background-color: #0ea5e9;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+        #custom-cursor-follower {
+            position: fixed;
+            width: 32px;
+            height: 32px;
+            border: 2px solid rgba(14, 165, 233, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            /* 뒤따라오는 부드러운 관성 느낌 */
+            transition: transform 0.08s cubic-bezier(0.25, 1, 0.5, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #custom-cursor-text {
+            font-size: 8px;
+            color: #0ea5e9;
+            font-weight: bold;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        /* 호버 시 커서 상태 확대 */
+        body.cursor-hovered #custom-cursor {
+            width: 4px;
+            height: 4px;
+            background-color: #0284c7;
+        }
+        body.cursor-hovered #custom-cursor-follower {
+            width: 44px;
+            height: 44px;
+            border-color: rgba(2, 132, 199, 0.8);
+            background-color: rgba(224, 242, 254, 0.3);
+        }
+        body.cursor-hovered #custom-cursor-text {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* 모바일 디바이스 등 터치 환경에서는 커서 레이어 제거 */
+        @media (max-width: 1024px) {
+            body {
+                cursor: auto !important;
+            }
+            a, button, [role="button"] {
+                cursor: pointer !important;
+            }
+            #custom-cursor, #custom-cursor-follower {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 selection:bg-brand-200 selection:text-brand-800 relative min-h-screen overflow-x-hidden">
+
+    <!-- 백그라운드 은은한 점/파티클 캔버스 레이어 (z-20으로 올려 반투명한 섹션들 위에서 은은하게 부유하도록 설계) -->
+    <canvas id="particle-canvas" class="fixed inset-0 pointer-events-none z-20"></canvas>
+
+    <!-- 커스텀 커서 마크업 (데스크톱 기기 대응) -->
+    <div id="custom-cursor"></div>
+    <div id="custom-cursor-follower">
+        <span id="custom-cursor-text">&lt;/&gt;</span>
+    </div>
+
+    <!-- 네비게이션 바 -->
+    <nav class="sticky top-0 z-50 bg-white/70 backdrop-blur-md border-b border-brand-100">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="font-title text-xl font-bold text-brand-700 tracking-wide hover-target">정빈's Log</a>
+            <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
+                <a href="#intro" class="hover:text-brand-600 smooth-transition hover-target">소개</a>
+                <a href="#hobbies" class="hover:text-brand-600 smooth-transition hover-target">취미 카드</a>
+                <a href="#details" class="hover:text-brand-600 smooth-transition hover-target">깊이 읽기</a>
+                <a href="#algorithm" class="hover:text-brand-600 smooth-transition hover-target">알고리즘</a>
+                <a href="#gallery" class="hover:text-brand-600 smooth-transition hover-target">갤러리</a>
+            </div>
+            <button onclick="scrollToCTA()" class="smooth-transition text-xs bg-brand-100 hover:bg-brand-200 text-brand-800 font-semibold px-4 py-2 rounded-full hover-target">
+                학우분들께 👋
+            </button>
+        </div>
+    </nav>
+
+    <!-- 1. 히어로 섹션 -->
+    <header class="relative min-h-[85vh] flex items-center bg-gradient-to-b from-brand-50/50 via-white/50 to-slate-50/50 backdrop-blur-[1px] overflow-hidden px-6 z-10">
+        <!-- 배경 데코레이션 링 -->
+        <div class="absolute top-1/4 left-10 w-72 h-72 bg-brand-200/30 rounded-full blur-3xl -z-10"></div>
+        <div class="absolute bottom-10 right-10 w-96 h-96 bg-brand-100/40 rounded-full blur-3xl -z-10"></div>
+        
+        <div class="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center py-12">
+            <!-- 텍스트 영역 (타이핑 효과 포함) -->
+            <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                <div class="inline-flex items-center space-x-2 bg-brand-100/80 text-brand-800 text-xs px-4 py-2 rounded-full font-medium">
+                    <span>☕ 같은 코딩 여정을 걷는 학우분들께</span>
+                </div>
+                <!-- 고정 크기(min-height)를 주어 타이핑 중 텍스트 레이아웃 밀림 방지 -->
+                <h1 class="font-title text-4xl sm:text-5xl md:text-6xl font-bold text-slate-900 leading-tight min-h-[110px] sm:min-h-[160px]">
+                    <span id="typed-title" class="text-brand-600 relative inline-block"></span><span class="text-brand-600 cursor-blink font-light">|</span>
+                </h1>
+                <p class="text-lg md:text-xl text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                    "지금부터 저의 취미를 소개합니다."<br/>
+                    코드 한 줄 뒤에 숨겨진 정적이고 아늑한 저만의 쉼터로 여러분을 초대합니다.
+                </p>
+                <div class="pt-4 flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
+                    <a href="#intro" class="smooth-transition px-8 py-3.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl shadow-lg shadow-brand-200 hover:shadow-xl font-medium text-center hover-target">
+                        이야기 시작하기
+                    </a>
+                    <button onclick="scrollToCTA()" class="smooth-transition px-8 py-3.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl font-medium text-center hover-target">
+                        궁금하면 더 알아보기 ✨
+                    </button>
+                </div>
+            </div>
+
+            <!-- 첫인상 그래픽 영역 (SVG 및 이모지 일러스트레이션) -->
+            <div class="lg:col-span-5 flex justify-center items-center">
+                <div class="relative w-72 h-72 sm:w-85 sm:h-85 md:w-96 md:h-96 animate-float">
+                    <!-- 원형 데코 레이어 -->
+                    <div class="absolute inset-0 bg-brand-100 rounded-2xl rotate-6 opacity-60"></div>
+                    <div class="absolute inset-0 bg-white/90 backdrop-blur-md border-2 border-brand-200 rounded-2xl shadow-xl p-8 flex flex-col justify-between">
+                        <!-- 일러스트 표현 -->
+                        <div class="w-full h-2/3 bg-brand-50/80 rounded-lg flex items-center justify-center relative overflow-hidden">
+                            <!-- 독서, 영화/드라마, 음악을 상징하는 추상적인 이모티콘 융합 그래픽 -->
+                            <div class="absolute -top-4 -left-4 w-16 h-16 bg-brand-200 rounded-full opacity-30"></div>
+                            <div class="absolute -bottom-8 -right-8 w-24 h-24 bg-brand-300 rounded-full opacity-20"></div>
+                            <div class="flex flex-col items-center space-y-3 z-10">
+                                <div class="flex space-x-4">
+                                    <span class="text-4xl filter drop-shadow">📚</span>
+                                    <span class="text-4xl filter drop-shadow">📺</span>
+                                    <span class="text-4xl filter drop-shadow">🎸</span>
+                                </div>
+                                <span class="text-xs font-semibold tracking-wider text-brand-700 bg-brand-100/80 px-2.5 py-1 rounded">정빈's 아카이브</span>
+                            </div>
+                        </div>
+                        <div class="space-y-2 mt-4">
+                            <div class="h-3 w-1/3 bg-brand-300 rounded"></div>
+                            <div class="h-2 w-full bg-slate-200/80 rounded"></div>
+                            <div class="h-2 w-5/6 bg-slate-200/80 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. 소개 섹션 (나는 어떤 사람인가?) -->
+    <section id="intro" class="py-24 bg-white/75 backdrop-blur-sm px-6 border-y border-slate-100 relative z-10">
+        <div class="max-w-4xl mx-auto text-center space-y-8">
+            <div class="inline-block">
+                <span class="text-sm font-semibold tracking-wider text-brand-600 bg-brand-50 px-3 py-1.5 rounded-full">ABOUT ME</span>
+            </div>
+            <h2 class="font-title text-3xl sm:text-4xl font-bold text-slate-900">
+                나는 어떤 사람인가?
+            </h2>
+            <div class="w-12 h-1 bg-brand-400 mx-auto rounded"></div>
+            
+            <p class="text-lg md:text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto font-light">
+                모니터 앞에서의 치열한 디버깅과 프로그래밍 학습 시간이 끝나면, 
+                저는 아주 <span class="font-semibold text-slate-800 underline decoration-brand-300 decoration-4">정적인 상태</span>로 돌아가는 것을 좋아합니다. 
+            </p>
+            
+            <p class="text-base md:text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto">
+                복잡한 연산과 알고리즘으로 지친 뇌를 부드럽게 이완시키는 방법은 의외로 간단합니다. 
+                문장이 주는 여운에 잠기고, 어두운 방안에서 영화와 드라마 속 기묘한 서스펜스에 전율하며, 
+                꽉 찬 밴드 사운드에 심장 박동을 맞추는 것이죠. 
+                저와 닮은 혹은 저와 다른 주말을 보내는 학우 여러분께 저의 세계를 나눕니다.
+            </p>
+        </div>
+    </section>
+
+    <!-- 3. 취미 분류 포인트 카드 섹션 -->
+    <section id="hobbies" class="py-24 bg-slate-50/70 backdrop-blur-sm px-6 relative z-10">
+        <div class="max-w-6xl mx-auto space-y-12">
+            <div class="text-center space-y-4">
+                <h2 class="font-title text-3xl font-bold text-slate-900">세 가지 핵심 취미</h2>
+                <p class="text-slate-500">지극히 주관적이고 깊이 있는 취미의 삼각지대</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- 카드 1: 독서 -->
+                <div class="group smooth-transition bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 hover:border-brand-200 flex flex-col justify-between min-h-[320px]">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 smooth-transition">
+                            📖
+                        </div>
+                        <h3 class="font-title text-2xl font-bold text-slate-800">독서</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">
+                            활자 사이를 거닐며 타인의 삶을 관조합니다. 주로 현실의 단면을 집요하게 그려내는 아름다운 한국 현대문학을 읽으며 마음을 가다듬습니다.
+                        </p>
+                    </div>
+                    <div class="pt-6">
+                        <a href="#read-detail" class="text-xs font-semibold text-brand-600 group-hover:text-brand-700 inline-flex items-center space-x-1 hover-target">
+                            <span>소설 속으로 들어가기</span>
+                            <span>→</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 카드 2: 영화 및 드라마 -->
+                <div class="group smooth-transition bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 hover:border-brand-200 flex flex-col justify-between min-h-[320px]">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 smooth-transition">
+                            😱
+                        </div>
+                        <h3 class="font-title text-2xl font-bold text-slate-800">영화 및 드라마</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">
+                            서늘한 긴장감과 기묘한 미스터리를 사랑합니다. 화면 속에 숨겨진 비밀과 본능적인 공포를 탐색하는 스릴러 마니아입니다.
+                        </p>
+                    </div>
+                    <div class="pt-6">
+                        <a href="#movie-detail" class="text-xs font-semibold text-brand-600 group-hover:text-brand-700 inline-flex items-center space-x-1 hover-target">
+                            <span>비명 지를 준비하기</span>
+                            <span>→</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 카드 3: 음악 -->
+                <div class="group smooth-transition bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 hover:border-brand-200 flex flex-col justify-between min-h-[320px]">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 smooth-transition">
+                            🎸
+                        </div>
+                        <h3 class="font-title text-2xl font-bold text-slate-800">음악</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">
+                            일렉기타의 거친 드라이브 사운드와 단단한 베이스가 정교하게 어우러진 밴드 음악을 주로 들으며 일상의 에너지를 충전합니다.
+                        </p>
+                    </div>
+                    <div class="pt-6">
+                        <a href="#music-detail" class="text-xs font-semibold text-brand-600 group-hover:text-brand-700 inline-flex items-center space-x-1 hover-target">
+                            <span>재생 목록 열어보기</span>
+                            <span>→</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. 각 취미별 디테일 소개 섹션 -->
+    <section id="details" class="py-12 bg-white/75 backdrop-blur-sm divide-y divide-slate-100 relative z-10">
+        
+        <!-- 디테일: 독서 (한국현대소설) -->
+        <div id="read-detail" class="py-20 px-6 scroll-mt-16">
+            <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <span class="text-xs font-bold text-amber-700 tracking-wider bg-amber-50 px-2.5 py-1 rounded">LITERATURE</span>
+                    <h3 class="font-title text-3xl font-bold text-slate-900 leading-tight">
+                        한국 현대소설을<br/>깊게 애정하는 이유
+                    </h3>
+                    <p class="text-slate-600 leading-relaxed text-sm md:text-base">
+                        번역된 문장보다 모국어가 선사하는 특유의 호흡과 세심한 감정선 표출에 깊이 몰입합니다. 
+                        특히 젊은 작가들의 한국 현대소설은 오늘날 우리가 직면한 관계의 불안과 쓸쓸함, 
+                        그리고 그 안에서 피어나는 작은 연대를 매우 세련되게 담아냅니다.
+                    </p>
+                    <div class="p-4 bg-amber-50/50 rounded-xl border border-amber-100/50">
+                        <p class="text-xs text-amber-900 italic font-medium">
+                            "프로그래밍이 엄밀하고 논리적인 코드로 시스템을 고치는 작업이라면, 현대 소설은 무너져 내리는 인간 마음의 버그를 세심히 응시하는 디버깅과 같습니다."
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-tr from-amber-100 to-amber-50/30 p-8 rounded-2xl border border-amber-200/40 flex flex-col justify-center space-y-4">
+                    <h4 class="text-slate-800 font-bold text-lg">최근에 책장을 채운 책들</h4>
+                    <ul class="space-y-3 text-sm text-slate-600">
+                        <li class="flex items-center space-x-2">
+                            <span class="text-amber-500">✔</span>
+                            <span>최은영 소설 - <span class="italic font-medium">『밝은 밤』</span></span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <span class="text-amber-500">✔</span>
+                            <span>구병모 소설 - <span class="italic font-medium">『아가미』</span></span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <span class="text-amber-500">✔</span>
+                            <span>한정현 소설 - <span class="italic font-medium">『여름은 고작 계절』</span></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 디테일: 영화 및 드라마 (공포/미스테리 영화 및 드라마) -->
+        <div id="movie-detail" class="py-20 px-6 scroll-mt-16 bg-slate-950 text-slate-300">
+            <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="lg:order-2 space-y-6">
+                    <span class="text-xs font-bold text-red-400 tracking-wider bg-red-950/80 px-2.5 py-1 rounded">HORROR & MYSTERY</span>
+                    <h3 class="font-title text-3xl font-bold text-white leading-tight">
+                        어둠 속의 전율,<br/>공포와 미스테리를 찾는 심리
+                    </h3>
+                    <p class="text-slate-400 leading-relaxed text-sm md:text-base">
+                        불을 완전히 끄고 차가운 공기 속에서 소리와 연출에 집중할 때 다가오는 날것의 본능적인 자극을 좋아합니다. 
+                        기괴함 뒤에 숨겨진 차가운 인간성과 사건을 추적하며 머리를 맞대는 미스테리 장르는 긴장 속에서 최고의 몰입을 줍니다.
+                    </p>
+                    <div class="p-4 bg-red-950/30 rounded-xl border border-red-900/30">
+                        <p class="text-xs text-red-300 italic font-medium">
+                            "알 수 없는 미지의 버그를 만났을 때의 기묘함과 그것을 파헤쳐 가며 마주하는 짜릿한 반전처럼, 미스테리 세계는 늘 저를 설레게 합니다."
+                        </p>
+                    </div>
+                </div>
+                <div class="lg:order-1 bg-zinc-900 p-8 rounded-2xl border border-red-950 flex flex-col justify-center space-y-4 shadow-2xl">
+                    <h4 class="text-red-400 font-bold text-lg">인생의 서늘하고 기묘한 순간들</h4>
+                    <ul class="space-y-3 text-sm text-slate-400">
+                        <li class="flex items-center space-x-2">
+                            <span class="text-red-500">📺</span>
+                            <span>넷플릭스 오리지널 - <span class="italic text-white">『기묘한 이야기 (Stranger Things)』</span></span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <span class="text-red-500">📺</span>
+                            <span>힐 하우스 연작 - <span class="italic text-white">『힐 하우스의 유령』</span></span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <span class="text-red-500">🎬</span>
+                            <span>김지운 감독 - <span class="italic text-white">『장화, 홍련』</span></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 디테일: 음악 (밴드 음악) -->
+        <div id="music-detail" class="py-20 px-6 scroll-mt-16">
+            <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <span class="text-xs font-bold text-blue-700 tracking-wider bg-blue-50 px-2.5 py-1 rounded">BAND MUSIC</span>
+                    <h3 class="font-title text-3xl font-bold text-slate-900 leading-tight">
+                        청춘의 심장 박동,<br/>밴드 사운드의 소용돌이
+                    </h3>
+                    <p class="text-slate-600 leading-relaxed text-sm md:text-base">
+                        악기들의 유기적인 레이어 합을 느낄 수 있는 밴드 라이브 음원에 깊은 희열을 느낍니다. 
+                        90년대 브릿팝의 거장 오아시스(Oasis)부터 현재 K-밴드의 새로운 장을 열어가고 있는 데이식스(DAY6)까지, 
+                        벅차오르는 드럼 리듬과 기타 훅은 삶의 크고 작은 스트레스를 싹 씻어내 줍니다.
+                    </p>
+                    <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100/50">
+                        <p class="text-xs text-blue-900 italic font-medium">
+                            "메인 보컬의 음색 뒤를 바쳐주는 묵직한 베이스 라인처럼, 저 또한 코딩 러닝 메이트인 학우분들에게 든든한 백킹 세션 같은 존재가 되고 싶습니다."
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-tr from-brand-100 to-brand-50/30 p-8 rounded-2xl border border-brand-200/40 flex flex-col justify-center space-y-4">
+                    <h4 class="text-slate-800 font-bold text-lg">최근 무한 반복 재생 목록</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-4 p-3 bg-white/90 rounded-lg shadow-sm">
+                            <div class="text-2xl">🇬🇧</div>
+                            <div>
+                                <h5 class="text-xs text-slate-400">Oasis</h5>
+                                <p class="text-sm font-semibold text-slate-800">Whatever</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4 p-3 bg-white/90 rounded-lg shadow-sm">
+                            <div class="text-2xl">🇰🇷</div>
+                            <div>
+                                <h5 class="text-xs text-slate-400">DAY6</h5>
+                                <p class="text-sm font-semibold text-slate-800">놓아 놓아 놓아</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. 유튜브 알고리즘 섹션 (민음사, g무비 채널) -->
+    <section id="algorithm" class="py-24 bg-brand-50/80 backdrop-blur-sm px-6 scroll-mt-16 relative z-10">
+        <div class="max-w-4xl mx-auto space-y-12">
+            <div class="text-center space-y-4">
+                <div class="inline-block">
+                    <span class="text-xs font-bold text-red-600 bg-red-100 px-3 py-1.5 rounded-full">YOUTUBE FEED</span>
+                </div>
+                <h2 class="font-title text-3xl font-bold text-slate-900">제 유튜브 알고리즘을 엿보실래요?</h2>
+                <p class="text-slate-600 max-w-xl mx-auto text-sm md:text-base">
+                    취향은 거짓말을 하지 않나 봅니다. 제 평소 관심사와 은밀한 덕질(?)의 흔적이 고스란히 묻어나는 알고리즘 피드입니다.
+                </p>
+            </div>
+
+            <!-- 알고리즘 카드 리스트 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- 민음사 채널 카드 -->
+                <div class="smooth-transition bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-md hover:shadow-xl border border-brand-200/50 flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-xl">
+                                📚
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">민음사 TV</h4>
+                                <span class="text-xs text-red-500 font-semibold">구독 중 🔔</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50/95 p-4 rounded-xl border border-slate-100 text-sm text-slate-600 space-y-2">
+                            <p class="font-semibold text-slate-700">📌 최근 시청 로그:</p>
+                            <p>"편집자들의 기품 넘치면서도 코믹한 책 추천 토크, 세계문학 전집 언박싱 영상을 보며 위시리스트를 꾹꾹 채웁니다."</p>
+                        </div>
+                    </div>
+                    <div class="pt-6 border-t border-slate-100 mt-6 flex justify-between items-center">
+                        <span class="text-xs text-slate-400">카테고리: 도서/인문학</span>
+                        <a href="https://www.youtube.com/@minumsaTV" target="_blank" class="text-xs font-semibold text-brand-600 hover:underline hover-target">채널 구경하기</a>
+                    </div>
+                </div>
+
+                <!-- g무비 채널 카드 -->
+                <div class="smooth-transition bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-md hover:shadow-xl border border-brand-200/50 flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-xl">
+                                🍿
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">g무비 (G-Movie)</h4>
+                                <span class="text-xs text-red-500 font-semibold">구독 중 🔔</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50/95 p-4 rounded-xl border border-slate-100 text-sm text-slate-600 space-y-2">
+                            <p class="font-semibold text-slate-700">📌 최근 시청 로그:</p>
+                            <p>"치밀하고 정교하게 설계된 영화 및 드라마 리뷰를 감상합니다. 유쾌하면서도 깊이 있는 주옥같은 분석 영상에 흠뻑 빠지게 되네요."</p>
+                        </div>
+                    </div>
+                    <div class="pt-6 border-t border-slate-100 mt-6 flex justify-between items-center">
+                        <span class="text-xs text-slate-400">카테고리: 영화/드라마 리뷰</span>
+                        <a href="https://www.youtube.com/@지무비" target="_blank" class="text-xs font-semibold text-brand-600 hover:underline hover-target">채널 구경하기</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. 갤러리 섹션 -->
+    <section id="gallery" class="py-24 bg-white/75 backdrop-blur-sm px-6 scroll-mt-16 relative z-10">
+        <div class="max-w-6xl mx-auto space-y-12">
+            <div class="text-center space-y-4">
+                <h2 class="font-title text-3xl font-bold text-slate-900">영감의 갤러리</h2>
+                <p class="text-slate-500">저의 머릿속과 방 한구석을 채운 조각들을 이미지로 모아봤습니다</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- 독서 이미지 1 -->
+                <div class="group relative overflow-hidden rounded-2xl bg-amber-50 border border-amber-100 aspect-[4/3] flex flex-col justify-between p-6 shadow-sm hover:shadow-lg smooth-transition">
+                    <div class="absolute inset-0 opacity-10 bg-cover bg-center pointer-events-none" style="background-image: url('https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600');"></div>
+                    <div class="z-10 flex justify-between items-start">
+                        <span class="text-xs font-bold text-amber-800 bg-white/80 px-2.5 py-1 rounded-full">책 갈피</span>
+                        <span class="text-xl">📚</span>
+                    </div>
+                    <div class="z-10 space-y-1">
+                        <h4 class="font-bold text-slate-800 text-sm">고요한 오후의 서재</h4>
+                        <p class="text-xs text-slate-500">책장 넘기는 소리만 가득한 사색의 시간</p>
+                    </div>
+                </div>
+
+                <!-- 독서 이미지 2 -->
+                <div class="group relative overflow-hidden rounded-2xl bg-amber-50 border border-amber-100 aspect-[4/3] flex flex-col justify-between p-6 shadow-sm hover:shadow-lg smooth-transition">
+                    <div class="absolute inset-0 opacity-10 bg-cover bg-center pointer-events-none" style="background-image: url('https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?auto=format&fit=crop&q=80&w=600');"></div>
+                    <div class="z-10 flex justify-between items-start">
+                        <span class="text-xs font-bold text-amber-800 bg-white/80 px-2.5 py-1 rounded-full">아날로그 감성</span>
+                        <span class="text-xl">☕</span>
+                    </div>
+                    <div class="z-10 space-y-1">
+                        <h4 class="font-bold text-slate-800 text-sm">커피와 문장들</h4>
+                        <p class="text-xs text-slate-500">따뜻한 온기 뒤로 만나는 모국어의 깊이</p>
+                    </div>
+                </div>
+
+                <!-- 영화/드라마 이미지 1 -->
+                <div class="group relative overflow-hidden rounded-2xl bg-zinc-900 border border-zinc-800 aspect-[4/3] flex flex-col justify-between p-6 shadow-sm hover:shadow-lg smooth-transition">
+                    <div class="absolute inset-0 opacity-10 bg-cover bg-center pointer-events-none" style="background-image: url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&q=80&w=600');"></div>
+                    <div class="z-10 flex justify-between items-start">
+                        <span class="text-xs font-bold text-red-400 bg-black/50 px-2.5 py-1 rounded-full">미스테리 시네마</span>
+                        <span class="text-xl">🎬</span>
+                    </div>
+                    <div class="z-10 space-y-1">
+                        <h4 class="font-bold text-white text-sm">어두운 상영관</h4>
+                        <p class="text-xs text-slate-400">스크린의 팽팽한 서스펜스에 완전 몰입하는 밤</p>
+                    </div>
+                </div>
+
+                <!-- 영화/드라마 이미지 2 -->
+                <div class="group relative overflow-hidden rounded-2xl bg-zinc-900 border border-zinc-800 aspect-[4/3] flex flex-col justify-between p-6 shadow-sm hover:shadow-lg smooth-transition">
+                    <div class="absolute inset-0 opacity-10 bg-cover bg-center pointer-events-none" style="background-image: url('https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=80&w=600');"></div>
+                    <div class="z-10 flex justify-between items-start">
+                        <span class="text-xs font-bold text-red-400 bg-black/50 px-2.5 py-1 rounded-full">스트리밍 룸</span>
+                        <span class="text-xl">📺</span>
+                    </div>
+                    <div class="z-10 space-y-1">
+                        <h4 class="font-bold text-white text-sm">기묘한 전율의 연속</h4>
+                        <p class="text-xs text-slate-400">헤드폰 너머 느껴지는 기이한 서늘함</p>
+                    </div>
+                </div>
+
+                <!-- 음악 이미지 1 -->
+                <div class="group relative overflow-hidden rounded-2xl bg-blue-50 border border-blue-100 aspect-[4/3] flex flex-col justify-between p-6 shadow-sm hover:shadow-lg smooth-transition">
+                    <div class="absolute inset-0 opacity-10 bg-cover bg-center pointer-events-none" style="background-image: url('https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=600');"></div>
+                    <div class="z-10 flex justify-between items-start">
+                        <span class="text-xs font-bold text-blue-800 bg-white/80 px-2.5 py-1 rounded-full">사운드 트랙</span>
+                        <span class="text-xl">🎸</span>
+                    </div>
+                    <div class="z-10 space-y-1">
+                        <h4 class="font-bold text-slate-800 text-sm">일렉기타 & 이펙터</h4>
+                        <p class="text-xs text-slate-500">일렁이는 크런치 톤이 전해주는 짜릿함</p>
+                    </div>
+                </div>
+
+                <!-- 음악 이미지 2 -->
+                <div class="group relative overflow-hidden rounded-2xl bg-blue-50 border border-blue-100 aspect-[4/3] flex flex-col justify-between p-6 shadow-sm hover:shadow-lg smooth-transition">
+                    <div class="absolute inset-0 opacity-10 bg-cover bg-center pointer-events-none" style="background-image: url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=600');"></div>
+                    <div class="z-10 flex justify-between items-start">
+                        <span class="text-xs font-bold text-blue-800 bg-white/80 px-2.5 py-1 rounded-full">페스티벌</span>
+                        <span class="text-xl">🥁</span>
+                    </div>
+                    <div class="z-10 space-y-1">
+                        <h4 class="font-bold text-slate-800 text-sm">라이브 합주 열기</h4>
+                        <p class="text-xs text-slate-500">지루한 일상을 한번에 터뜨려 줄 폭발력</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. CTA (Call To Action) 섹션 -->
+    <section class="py-20 bg-gradient-to-t from-brand-50/50 to-white/50 backdrop-blur-sm px-6 border-t border-slate-100 relative z-10">
+        <div class="max-w-3xl mx-auto text-center space-y-8">
+            <h3 class="font-title text-3xl font-bold text-slate-900">
+                저의 일상 레이어가 좀 더 알고 싶으신가요?
+            </h3>
+            <p class="text-slate-600 text-sm md:text-base max-w-xl mx-auto">
+                책, 영화와 드라마, 그리고 밴드 음악에 깃든 영감들이 모여 저를 형성하고 있습니다. <br/>
+                저와 통하는 코드가 있거나 나눌 이야기가 있다면 편하게 클릭해 보세요!
+            </p>
+            <div class="pt-4">
+                <button 
+                    onclick="actionClick(this)"
+                    class="smooth-transition inline-flex items-center space-x-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-brand-200 hover:scale-110 active:scale-95 cursor-none hover-target">
+                    <span>💡 궁금하면 더 알아보기</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. 푸터 섹션 -->
+    <footer class="bg-slate-900 text-slate-400 py-16 px-6 border-t border-slate-800 relative z-10">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
+            <div class="space-y-2 text-center md:text-left">
+                <p class="font-title text-lg font-bold text-white tracking-wider">서정빈의 취미 아카이브</p>
+                <p class="text-xs text-slate-500">열심히 공부하며, 감성을 채우며, 그렇게 살아가고 있습니다.</p>
+            </div>
+            <div class="text-center md:text-right space-y-2">
+                <p class="text-sm font-medium text-slate-300">끝까지 읽어주셔서 대단히 감사합니다. 🍀</p>
+                <p class="text-xs text-slate-600">© 2026 Seojeongbin. Made with Coffee and Pure Passion.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 자바스크립트 로직 (파티클 엔진, 타이핑 애니메이션, 커서 트래킹) -->
+    <script>
+        // --- 1. 은은한 배경 파티클 효과 설정 (Canvas 기반) ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particlesArray = [];
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1; // 1~3px 크기의 미세한 점
+                this.speedX = Math.random() * 0.15 - 0.075; // 아주 느린 무작위 가로 흐름
+                this.speedY = Math.random() * -0.25 - 0.05;  // 가볍게 서서히 위로 부유
+                this.alpha = Math.random() * 0.6 + 0.1;   // 불투명도 0.1~0.7 사이
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // 화면 밖으로 나갔을 때 재배치
+                if (this.y < 0) {
+                    this.y = canvas.height;
+                    this.x = Math.random() * canvas.width;
+                }
+                if (this.x < 0 || this.x > canvas.width) {
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = '#0ea5e9'; // 좀 더 뚜렷하고 따뜻한 하늘색(brand-500) 파티클
+                ctx.shadowColor = '#bae6fd';
+                ctx.shadowBlur = 4;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            const particleCount = Math.floor((canvas.width * canvas.height) / 20000); // 파티클 밀도 최적화
+            for (let i = 0; i < Math.min(particleCount, 150); i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+        window.addEventListener('resize', initParticles);
+
+
+        // --- 2. 타이틀 타이핑 (Typewriter) 효과 구현 ---
+        const textToType = "저의 취미를\n소개합니다"; // 줄바꿈을 활용한 자연스러운 두 줄 구성
+        const typedTitleSpan = document.getElementById("typed-title");
+        let charIndex = 0;
+
+        function typeTitle() {
+            if (charIndex < textToType.length) {
+                const currentChar = textToType.charAt(charIndex);
+                if (currentChar === '\n') {
+                    typedTitleSpan.appendChild(document.createElement("br"));
+                } else {
+                    typedTitleSpan.appendChild(document.createTextNode(currentChar));
+                }
+                charIndex++;
+                setTimeout(typeTitle, 150); // 타이핑 속도 (150ms)
+            }
+        }
+
+        // 페이지 로드 500ms 후 타이핑 애니메이션 시작
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(typeTitle, 500);
+        });
+
+
+        // --- 3. 커스텀 마우스 커서 트래킹 로직 ---
+        const cursor = document.getElementById('custom-cursor');
+        const follower = document.getElementById('custom-cursor-follower');
+        
+        let mouseX = 0, mouseY = 0;
+        let followerX = 0, followerY = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // 메인 포인터는 즉시 동기화
+            cursor.style.left = mouseX + 'px';
+            cursor.style.top = mouseY + 'px';
+        });
+
+        // 부드럽게 뒤쫓아오는 러버밴드 느낌의 애니메이션 루프
+        function updateFollower() {
+            // 관성 공식 (Lerp) 적용
+            followerX += (mouseX - followerX) * 0.12;
+            followerY += (mouseY - followerY) * 0.12;
+
+            follower.style.left = followerX + 'px';
+            follower.style.top = followerY + 'px';
+
+            requestAnimationFrame(updateFollower);
+        }
+        updateFollower();
+
+        // 호버 대상(버튼, 링크 등) 위를 지날 때 확대 인터랙션 추가
+        const hoverTargets = document.querySelectorAll('.hover-target, a, button');
+        hoverTargets.forEach(target => {
+            target.addEventListener('mouseenter', () => {
+                document.body.classList.add('cursor-hovered');
+            });
+            target.addEventListener('mouseleave', () => {
+                document.body.classList.remove('cursor-hovered');
+            });
+        });
+
+
+        // --- 4. CTA 및 스크롤 이벤트 로직 ---
+        function actionClick(button) {
+            // 클릭 시 시각적으로 통통 튀는 피드백(CSS 트랜지션 기반 scale 조정)
+            button.classList.add('scale-110', 'bg-brand-700');
+            
+            setTimeout(() => {
+                button.classList.remove('scale-110', 'bg-brand-700');
+                
+                // 5번 섹션 (유튜브 알고리즘 섹션)으로 부드럽게 스크롤 이동
+                const targetSection = document.getElementById('algorithm');
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 300);
+        }
+
+        // 네비게이션 버튼용 스크롤 링크 함수
+        function scrollToCTA() {
+            const targetSection = document.getElementById('algorithm');
+            if (targetSection) {
+                targetSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>
